@@ -25,4 +25,4 @@ services:
     startCommand: cd frontend && npm start
     envVars:
       - key: NEXT_PUBLIC_API_URL
-        value: https://edupath-backend.onrender.com
+        value: https://edupath-backend-irch.onrender.com
