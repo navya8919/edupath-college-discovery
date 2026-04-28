@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: edupath-backend
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && node --experimental-sqlite -r ts-node/register/transpile-only src/index.ts
+    envVars:
+      - key: NODE_VERSION
+        value: 22.14.0
+      - key: JWT_SECRET
+        generateValue: true
+      - key: PORT
+        value: 4000
+      - key: NODE_ENV
+        value: production
+
+  - type: web
+    name: edupath-frontend
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: cd frontend && npm install && npm run build
+    startCommand: cd frontend && npm start
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        value: https://edupath-backend.onrender.com
