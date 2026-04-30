@@ -3,6 +3,8 @@ import jwt from 'jsonwebtoken';
 
 export interface AuthRequest extends Request {
   user?: { id: string; email: string; name: string };
+  body: Record<string, any>;
+  params: Record<string, string>;
 }
 
 export function authMiddleware(req: AuthRequest, res: Response, next: NextFunction): void {
