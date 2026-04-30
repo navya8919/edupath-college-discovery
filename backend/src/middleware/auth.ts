@@ -4,7 +4,9 @@ import jwt from 'jsonwebtoken';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface AuthRequest extends Request {
   user?: { id: string; email: string; name: string };
-  // body and params are inherited from Request — do not override them here
+  body: any;
+  params: any;
+  query: any;
 }
 
 export function authMiddleware(req: AuthRequest, res: Response, next: NextFunction): void {
