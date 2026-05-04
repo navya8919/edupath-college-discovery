@@ -9,13 +9,15 @@ const API = process.env.NEXT_PUBLIC_API_URL;
 const features = [
   { icon: '🔍', title: 'Smart Search', desc: 'Search and filter colleges by location, fees, type, placement and more.' },
   { icon: '⚖️', title: 'Side-by-Side Compare', desc: 'Compare up to 3 colleges with a detailed breakdown of every metric.' },
+  { icon: '🎯', title: 'College Predictor', desc: 'Enter your exam rank — JEE, NEET, CAT, GATE — and get college predictions instantly.' },
   { icon: '❤️', title: 'Save & Shortlist', desc: 'Save your favourite colleges and build your shortlist after signing in.' },
   { icon: '💬', title: 'Community Q&A', desc: 'Ask questions, share insights, and get answers from the community.' },
+  { icon: '👤', title: 'Profile & History', desc: 'View your saved colleges and past comparisons all in one place.' },
 ];
 
 const stats = [
-  { value: '12+', label: 'Top Colleges' },
-  { value: '4', label: 'Features' },
+  { value: '20+', label: 'Top Colleges' },
+  { value: '6', label: 'Features' },
   { value: '100%', label: 'Free' },
   { value: '⭐ 4.5', label: 'Avg Rating' },
 ];
@@ -94,6 +96,9 @@ export default function HomePage() {
             <Link href="/compare" className="btn-outline text-base px-8 py-3.5">
               ⚖️ Compare Now
             </Link>
+            <Link href="/predictor" className="btn-ghost text-base px-8 py-3.5">
+              🎯 Predictor
+            </Link>
           </div>
 
           {/* Stats */}
@@ -117,7 +122,7 @@ export default function HomePage() {
               Make smarter college decisions with our comprehensive toolkit
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((f) => (
               <div key={f.title} className="card glass-hover text-center">
                 <div className="text-4xl mb-4">{f.icon}</div>
@@ -248,6 +253,7 @@ export default function HomePage() {
           <div className="flex items-center gap-4 text-xs text-[var(--text-dim)]">
             <Link href="/colleges" className="hover:text-indigo-400 transition-colors">Colleges</Link>
             <Link href="/compare" className="hover:text-indigo-400 transition-colors">Compare</Link>
+            <Link href="/predictor" className="hover:text-indigo-400 transition-colors">Predictor</Link>
             <Link href="/discuss" className="hover:text-indigo-400 transition-colors">Discuss</Link>
           </div>
         </div>

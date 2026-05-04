@@ -7,6 +7,7 @@ import authRoutes from './routes/auth';
 import collegesRoutes from './routes/colleges';
 import userRoutes from './routes/user';
 import questionsRoutes from './routes/questions';
+import predictorRoutes from './routes/predictor';
 
 dotenv.config();
 
@@ -32,6 +33,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/colleges', collegesRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/questions', questionsRoutes);
+app.use('/api/predictor', predictorRoutes);
 
 // 404 handler
 app.use((_req, res) => {

@@ -14,6 +14,7 @@ export default function Navbar() {
     { href: '/', label: 'Home' },
     { href: '/colleges', label: 'Colleges' },
     { href: '/compare', label: 'Compare' },
+    { href: '/predictor', label: '🎯 Predictor' },
     { href: '/discuss', label: 'Discuss' },
   ];
 
@@ -63,10 +64,22 @@ export default function Navbar() {
                     </div>
                     <span className="text-sm text-[var(--text-muted)]">{user.name.split(' ')[0]}</span>
                   </button>
-                  <div className="absolute right-0 top-full mt-1 w-40 glass rounded-xl shadow-xl border border-[var(--border)] opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200">
+                  <div className="absolute right-0 top-full mt-1 w-44 glass rounded-xl shadow-xl border border-[var(--border)] opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200">
+                    <Link
+                      href="/profile"
+                      className="block px-4 py-2.5 text-sm text-[var(--text-muted)] hover:text-indigo-400 hover:bg-white/5 rounded-t-xl transition-colors"
+                    >
+                      👤 My Profile
+                    </Link>
+                    <Link
+                      href="/saved"
+                      className="block px-4 py-2.5 text-sm text-[var(--text-muted)] hover:text-indigo-400 hover:bg-white/5 transition-colors"
+                    >
+                      ❤️ Saved Colleges
+                    </Link>
                     <button
                       onClick={handleLogout}
-                      className="w-full text-left px-4 py-2.5 text-sm text-[var(--text-muted)] hover:text-[var(--danger)] hover:bg-white/5 rounded-xl transition-colors"
+                      className="w-full text-left px-4 py-2.5 text-sm text-[var(--text-muted)] hover:text-[var(--danger)] hover:bg-white/5 rounded-b-xl transition-colors"
                     >
                       Sign out
                     </button>
