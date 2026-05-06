@@ -44,7 +44,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response): Promis
   if (!title || !body) { res.status(400).json({ error: 'Title and body are required' }); return; }
   try {
     const result = await pool.query(
-      'INSERT INTO questions (id, user_id, college_id, title, body) VALUES (gen_random_uuid(),$1,$2,$3,$4) RETURNING *',
+      'INSERT INTO questions (user_id, college_id, title, body) VALUES ($1,$2,$3,$4) RETURNING *',
       [req.user!.id, college_id || null, title, body]
     );
     res.status(201).json({ question: result.rows[0] });
@@ -76,7 +76,7 @@ router.post('/:id/answers', authMiddleware, async (req: AuthRequest, res: Respon
   if (!body) { res.status(400).json({ error: 'Body is required' }); return; }
   try {
     const result = await pool.query(
-      'INSERT INTO answers (id, question_id, user_id, body) VALUES (gen_random_uuid(),$1,$2,$3) RETURNING *',
+      'INSERT INTO answers (question_id, user_id, body) VALUES ($1,$2,$3) RETURNING *',
       [req.params.id, req.user!.id, body]
     );
     res.status(201).json({ answer: result.rows[0] });

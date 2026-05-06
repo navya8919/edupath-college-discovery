@@ -1,5 +1,4 @@
-import db from './db';
-import { v4 as uuidv4 } from 'uuid';
+import { pool } from './db';
 
 function avatar(name: string, bg: string) {
   return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=${bg}&color=fff&size=128&bold=true&font-size=0.33`;
@@ -15,8 +14,8 @@ const collegesData = [
     description: 'IIT Madras is ranked #1 in engineering in India (NIRF 2023). Known for world-class research, innovation, and a sprawling forest campus in Chennai.',
     placement_percentage: 96.1, avg_package: 2200000, highest_package: 28000000, total_students: 9200,
     accreditation: 'NAAC A++', ranking: 1,
-    courses: JSON.stringify([{ name: 'B.Tech Computer Science', duration: '4 years', fees: 190000 }, { name: 'B.Tech Electrical Engineering', duration: '4 years', fees: 190000 }, { name: 'M.Tech', duration: '2 years', fees: 95000 }, { name: 'Ph.D', duration: '4-5 years', fees: 50000 }]),
-    facilities: JSON.stringify(['Library', 'Cricket Ground', 'Hostels', 'Research Labs', 'Marine Labs', 'Deer Park', 'Hospital']),
+    courses: [{ name: 'B.Tech Computer Science', duration: '4 years', fees: 190000 }, { name: 'B.Tech Electrical Engineering', duration: '4 years', fees: 190000 }, { name: 'M.Tech', duration: '2 years', fees: 95000 }],
+    facilities: ['Library', 'Cricket Ground', 'Hostels', 'Research Labs', 'Marine Labs', 'Deer Park', 'Hospital'],
   },
   {
     name: 'Indian Institute of Technology Bombay',
@@ -27,8 +26,8 @@ const collegesData = [
     description: 'IIT Bombay is one of the premier engineering institutions of India, globally known for cutting-edge research, innovation, and entrepreneurship.',
     placement_percentage: 95.2, avg_package: 2100000, highest_package: 25000000, total_students: 10000,
     accreditation: 'NAAC A++', ranking: 2,
-    courses: JSON.stringify([{ name: 'B.Tech Computer Science', duration: '4 years', fees: 200000 }, { name: 'B.Tech Electrical Engineering', duration: '4 years', fees: 200000 }, { name: 'M.Tech', duration: '2 years', fees: 100000 }, { name: 'MBA', duration: '2 years', fees: 150000 }]),
-    facilities: JSON.stringify(['Library', 'Sports Complex', 'Hostels', 'Research Labs', 'Wi-Fi Campus', 'Gymnasium', 'Bank']),
+    courses: [{ name: 'B.Tech Computer Science', duration: '4 years', fees: 200000 }, { name: 'M.Tech', duration: '2 years', fees: 100000 }, { name: 'MBA', duration: '2 years', fees: 150000 }],
+    facilities: ['Library', 'Sports Complex', 'Hostels', 'Research Labs', 'Wi-Fi Campus', 'Gymnasium'],
   },
   {
     name: 'Indian Institute of Technology Kharagpur',
@@ -36,11 +35,11 @@ const collegesData = [
     fees_min: 82000, fees_max: 195000, rating: 4.7, rating_count: 4600,
     type: 'Government', established: 1951, website: 'https://www.iitkgp.ac.in',
     image_url: avatar('IIT KGP', '1d4ed8'),
-    description: "The oldest IIT, IIT Kharagpur spans 2100 acres and is known for its research output, distinguished alumni, and diverse academic programs.",
+    description: 'The oldest IIT, IIT Kharagpur spans 2100 acres and is known for its research output, distinguished alumni, and diverse academic programs.',
     placement_percentage: 93.8, avg_package: 1850000, highest_package: 20000000, total_students: 22000,
     accreditation: 'NAAC A++', ranking: 3,
-    courses: JSON.stringify([{ name: 'B.Tech Computer Science', duration: '4 years', fees: 195000 }, { name: 'B.Tech Ocean Engineering', duration: '4 years', fees: 185000 }, { name: 'M.Tech', duration: '2 years', fees: 100000 }, { name: 'MBA', duration: '2 years', fees: 200000 }]),
-    facilities: JSON.stringify(['Multiple Libraries', 'Olympic Pool', 'Hostels', 'Research Parks', 'Hospital', 'Shopping Center', 'Airport']),
+    courses: [{ name: 'B.Tech Computer Science', duration: '4 years', fees: 195000 }, { name: 'M.Tech', duration: '2 years', fees: 100000 }, { name: 'MBA', duration: '2 years', fees: 200000 }],
+    facilities: ['Multiple Libraries', 'Olympic Pool', 'Hostels', 'Research Parks', 'Hospital'],
   },
   {
     name: 'Indian Institute of Technology Delhi',
@@ -51,8 +50,8 @@ const collegesData = [
     description: "IIT Delhi is one of India's foremost institutions of higher education with a strong emphasis on research and entrepreneurship.",
     placement_percentage: 94.5, avg_package: 1950000, highest_package: 22000000, total_students: 8500,
     accreditation: 'NAAC A++', ranking: 3,
-    courses: JSON.stringify([{ name: 'B.Tech Computer Science', duration: '4 years', fees: 210000 }, { name: 'B.Tech Mechanical Engineering', duration: '4 years', fees: 210000 }, { name: 'M.Tech', duration: '2 years', fees: 110000 }]),
-    facilities: JSON.stringify(['Library', 'Sports Complex', 'Hostels', 'Research Labs', 'Medical Facility', 'Tennis Courts']),
+    courses: [{ name: 'B.Tech Computer Science', duration: '4 years', fees: 210000 }, { name: 'M.Tech', duration: '2 years', fees: 110000 }],
+    facilities: ['Library', 'Sports Complex', 'Hostels', 'Research Labs', 'Medical Facility'],
   },
   {
     name: 'National Institute of Technology Trichy',
@@ -63,8 +62,8 @@ const collegesData = [
     description: 'NIT Trichy is consistently ranked among the top NITs in India, known for quality technical education and excellent placements.',
     placement_percentage: 92.1, avg_package: 1400000, highest_package: 16000000, total_students: 6500,
     accreditation: 'NAAC A++', ranking: 4,
-    courses: JSON.stringify([{ name: 'B.Tech Computer Science', duration: '4 years', fees: 140000 }, { name: 'B.Tech Production Engineering', duration: '4 years', fees: 130000 }, { name: 'M.Tech', duration: '2 years', fees: 75000 }]),
-    facilities: JSON.stringify(['Library', 'Stadium', 'Hostels', 'Research Parks', 'Medical Center', 'Canteen']),
+    courses: [{ name: 'B.Tech Computer Science', duration: '4 years', fees: 140000 }, { name: 'M.Tech', duration: '2 years', fees: 75000 }],
+    facilities: ['Library', 'Stadium', 'Hostels', 'Research Parks', 'Medical Center'],
   },
   {
     name: 'BITS Pilani',
@@ -75,8 +74,8 @@ const collegesData = [
     description: 'BITS Pilani is one of the top private engineering universities in India with a strong global alumni network and WILP programs.',
     placement_percentage: 90.3, avg_package: 1600000, highest_package: 18000000, total_students: 12000,
     accreditation: 'NAAC A', ranking: 5,
-    courses: JSON.stringify([{ name: 'B.E. Computer Science', duration: '4 years', fees: 600000 }, { name: 'B.E. Electronics', duration: '4 years', fees: 580000 }, { name: 'M.Sc', duration: '2 years', fees: 300000 }, { name: 'MBA', duration: '2 years', fees: 400000 }]),
-    facilities: JSON.stringify(['Library', 'Sports Complex', 'Hostels', 'Food Court', 'Auditorium', 'Medical Center', 'Innovation Center']),
+    courses: [{ name: 'B.E. Computer Science', duration: '4 years', fees: 600000 }, { name: 'B.E. Electronics', duration: '4 years', fees: 580000 }, { name: 'MBA', duration: '2 years', fees: 400000 }],
+    facilities: ['Library', 'Sports Complex', 'Hostels', 'Food Court', 'Medical Center'],
   },
   {
     name: 'Jadavpur University',
@@ -87,8 +86,8 @@ const collegesData = [
     description: 'Jadavpur University is a premier technical university in Eastern India, known for outstanding academic and research output at very affordable fees.',
     placement_percentage: 89.3, avg_package: 1050000, highest_package: 11000000, total_students: 18000,
     accreditation: 'NAAC A++', ranking: 6,
-    courses: JSON.stringify([{ name: 'B.E. Computer Science', duration: '4 years', fees: 50000 }, { name: 'B.E. Electronics & Communication', duration: '4 years', fees: 50000 }, { name: 'B.E. Mechanical', duration: '4 years', fees: 45000 }]),
-    facilities: JSON.stringify(['Library', 'Sports Complex', 'Hostels', 'Research Centers', 'Auditorium', 'Canteen']),
+    courses: [{ name: 'B.E. Computer Science', duration: '4 years', fees: 50000 }, { name: 'B.E. Electronics & Communication', duration: '4 years', fees: 50000 }],
+    facilities: ['Library', 'Sports Complex', 'Hostels', 'Research Centers', 'Auditorium'],
   },
   {
     name: 'Delhi Technological University',
@@ -99,8 +98,8 @@ const collegesData = [
     description: 'DTU (formerly DCE) is one of the oldest and premier engineering institutions of Delhi with excellent placement records and strong alumni.',
     placement_percentage: 88.2, avg_package: 1100000, highest_package: 14000000, total_students: 13000,
     accreditation: 'NAAC A', ranking: 8,
-    courses: JSON.stringify([{ name: 'B.Tech Computer Science', duration: '4 years', fees: 160000 }, { name: 'B.Tech Software Engineering', duration: '4 years', fees: 160000 }, { name: 'B.Tech Environmental Engineering', duration: '4 years', fees: 140000 }]),
-    facilities: JSON.stringify(['Library', 'Sports Complex', 'Hostels', 'Cafeteria', 'Innovation Center', 'Auditorium']),
+    courses: [{ name: 'B.Tech Computer Science', duration: '4 years', fees: 160000 }, { name: 'B.Tech Software Engineering', duration: '4 years', fees: 160000 }],
+    facilities: ['Library', 'Sports Complex', 'Hostels', 'Cafeteria', 'Innovation Center'],
   },
   {
     name: 'National Institute of Technology Surathkal',
@@ -108,11 +107,11 @@ const collegesData = [
     fees_min: 65000, fees_max: 130000, rating: 4.4, rating_count: 2500,
     type: 'Government', established: 1960, website: 'https://www.nitk.ac.in',
     image_url: avatar('NITK Surathkal', '166534'),
-    description: 'NIT Surathkal (NITK) is a premier NIT on the western coast of India, known for its picturesque beachside campus and strong technical education.',
+    description: 'NIT Surathkal is a premier NIT on the western coast of India, known for its picturesque beachside campus and strong technical education.',
     placement_percentage: 88.5, avg_package: 1250000, highest_package: 13000000, total_students: 7200,
     accreditation: 'NAAC A++', ranking: 9,
-    courses: JSON.stringify([{ name: 'B.Tech Computer Science', duration: '4 years', fees: 130000 }, { name: 'B.Tech Chemical Engineering', duration: '4 years', fees: 120000 }]),
-    facilities: JSON.stringify(['Library', 'Beach Campus', 'Hostels', 'Sports Complex', 'Gymnasium', 'Medical Center']),
+    courses: [{ name: 'B.Tech Computer Science', duration: '4 years', fees: 130000 }, { name: 'B.Tech Chemical Engineering', duration: '4 years', fees: 120000 }],
+    facilities: ['Library', 'Beach Campus', 'Hostels', 'Sports Complex', 'Medical Center'],
   },
   {
     name: 'Manipal Institute of Technology',
@@ -123,8 +122,8 @@ const collegesData = [
     description: 'Manipal Institute of Technology is one of the top private engineering colleges in India, known for excellent placements and international exposure.',
     placement_percentage: 85.7, avg_package: 1200000, highest_package: 12000000, total_students: 15000,
     accreditation: 'NAAC A+', ranking: 10,
-    courses: JSON.stringify([{ name: 'B.Tech Computer Science', duration: '4 years', fees: 500000 }, { name: 'B.Tech Mechatronics', duration: '4 years', fees: 480000 }, { name: 'B.Tech AI & Data Science', duration: '4 years', fees: 500000 }]),
-    facilities: JSON.stringify(['Library', 'Swimming Pool', 'Hostels', 'Food Court', 'Gym', 'Shopping Center', 'Hospital']),
+    courses: [{ name: 'B.Tech Computer Science', duration: '4 years', fees: 500000 }, { name: 'B.Tech AI & Data Science', duration: '4 years', fees: 500000 }],
+    facilities: ['Library', 'Swimming Pool', 'Hostels', 'Food Court', 'Hospital'],
   },
   {
     name: 'VIT University',
@@ -135,8 +134,8 @@ const collegesData = [
     description: 'VIT University is a Deemed University offering technology and engineering education with global collaborations and strong placement support.',
     placement_percentage: 82.4, avg_package: 900000, highest_package: 9000000, total_students: 35000,
     accreditation: 'NAAC A++', ranking: 12,
-    courses: JSON.stringify([{ name: 'B.Tech Computer Science', duration: '4 years', fees: 400000 }, { name: 'B.Tech AI & ML', duration: '4 years', fees: 400000 }, { name: 'B.Tech Bioinformatics', duration: '4 years', fees: 350000 }]),
-    facilities: JSON.stringify(['Multiple Libraries', 'Sports Complex', 'Hostels', 'Shopping Mall', 'Hospitals', 'Restaurants']),
+    courses: [{ name: 'B.Tech Computer Science', duration: '4 years', fees: 400000 }, { name: 'B.Tech AI & ML', duration: '4 years', fees: 400000 }],
+    facilities: ['Multiple Libraries', 'Sports Complex', 'Hostels', 'Shopping Mall', 'Hospitals'],
   },
   {
     name: 'PSG College of Technology',
@@ -147,8 +146,8 @@ const collegesData = [
     description: 'PSG College of Technology is one of the premier engineering institutions in Tamil Nadu, known for discipline, research and strong industry ties.',
     placement_percentage: 87.2, avg_package: 900000, highest_package: 8000000, total_students: 5400,
     accreditation: 'NAAC A++', ranking: 13,
-    courses: JSON.stringify([{ name: 'B.E. Computer Science', duration: '4 years', fees: 175000 }, { name: 'B.E. Mechanical', duration: '4 years', fees: 160000 }, { name: 'M.E.', duration: '2 years', fees: 90000 }]),
-    facilities: JSON.stringify(['Library', 'Sports Ground', 'Hostel', 'Workshop', 'Canteen', 'NSS']),
+    courses: [{ name: 'B.E. Computer Science', duration: '4 years', fees: 175000 }, { name: 'B.E. Mechanical', duration: '4 years', fees: 160000 }],
+    facilities: ['Library', 'Sports Ground', 'Hostel', 'Workshop', 'Canteen'],
   },
   {
     name: 'Thapar Institute of Engineering and Technology',
@@ -159,8 +158,8 @@ const collegesData = [
     description: 'Thapar Institute is a top-ranked private engineering university in North India, known for research output and strong industry partnerships.',
     placement_percentage: 86.9, avg_package: 1150000, highest_package: 11000000, total_students: 12000,
     accreditation: 'NAAC A', ranking: 14,
-    courses: JSON.stringify([{ name: 'B.E. Computer Engineering', duration: '4 years', fees: 550000 }, { name: 'B.E. Mechanical Engineering', duration: '4 years', fees: 530000 }, { name: 'M.E.', duration: '2 years', fees: 280000 }]),
-    facilities: JSON.stringify(['Library', 'Sports Complex', 'Hostels', 'Food Court', 'Medical Center', 'Entrepreneurship Cell']),
+    courses: [{ name: 'B.E. Computer Engineering', duration: '4 years', fees: 550000 }, { name: 'B.E. Mechanical Engineering', duration: '4 years', fees: 530000 }],
+    facilities: ['Library', 'Sports Complex', 'Hostels', 'Food Court', 'Entrepreneurship Cell'],
   },
   {
     name: 'Pune Institute of Computer Technology',
@@ -171,8 +170,8 @@ const collegesData = [
     description: 'PICT is one of the top engineering colleges in Pune known for its exceptional placement record in the IT industry.',
     placement_percentage: 91.5, avg_package: 1300000, highest_package: 10000000, total_students: 3200,
     accreditation: 'NAAC A', ranking: 15,
-    courses: JSON.stringify([{ name: 'B.E. Computer Engineering', duration: '4 years', fees: 200000 }, { name: 'B.E. Information Technology', duration: '4 years', fees: 190000 }, { name: 'B.E. Electronics', duration: '4 years', fees: 180000 }]),
-    facilities: JSON.stringify(['Library', 'Sports Ground', 'NSS Wing', 'Placement Cell', 'Canteen', 'Workshop']),
+    courses: [{ name: 'B.E. Computer Engineering', duration: '4 years', fees: 200000 }, { name: 'B.E. Information Technology', duration: '4 years', fees: 190000 }],
+    facilities: ['Library', 'Sports Ground', 'NSS Wing', 'Placement Cell', 'Canteen'],
   },
   {
     name: 'University of Hyderabad',
@@ -180,23 +179,11 @@ const collegesData = [
     fees_min: 20000, fees_max: 80000, rating: 4.5, rating_count: 3000,
     type: 'Government', established: 1974, website: 'https://uohyd.ac.in',
     image_url: avatar('UoH Hyderabad', '0c4a6e'),
-    description: 'University of Hyderabad (UoH) is a central university known for excellent research programs in science, humanities, and social sciences.',
+    description: 'University of Hyderabad is a central university known for excellent research programs in science, humanities, and social sciences.',
     placement_percentage: 82.0, avg_package: 780000, highest_package: 8000000, total_students: 7000,
     accreditation: 'NAAC A++', ranking: 16,
-    courses: JSON.stringify([{ name: 'M.Sc Computer Science', duration: '2 years', fees: 80000 }, { name: 'MBA', duration: '2 years', fees: 70000 }, { name: 'Ph.D', duration: '4-5 years', fees: 30000 }]),
-    facilities: JSON.stringify(['Library', 'Observatory', 'Hostels', 'Deer Park', 'Medical Center', 'Cultural Center']),
-  },
-  {
-    name: 'Vellore Institute of Technology Chennai',
-    location: 'Chennai, Tamil Nadu', state: 'Tamil Nadu', city: 'Chennai',
-    fees_min: 220000, fees_max: 420000, rating: 4.1, rating_count: 3400,
-    type: 'Private', established: 2010, website: 'https://chennai.vit.ac.in',
-    image_url: avatar('VIT Chennai', '581c87'),
-    description: 'VIT Chennai campus offers cutting-edge engineering programs in a vibrant metropolitan environment with excellent industry connectivity.',
-    placement_percentage: 83.7, avg_package: 920000, highest_package: 9500000, total_students: 18000,
-    accreditation: 'NAAC A++', ranking: 17,
-    courses: JSON.stringify([{ name: 'B.Tech Computer Science', duration: '4 years', fees: 420000 }, { name: 'B.Tech Bioengineering', duration: '4 years', fees: 380000 }]),
-    facilities: JSON.stringify(['Library', 'Sports Complex', 'Hostels', 'Food Court', 'Medical Center']),
+    courses: [{ name: 'M.Sc Computer Science', duration: '2 years', fees: 80000 }, { name: 'MBA', duration: '2 years', fees: 70000 }],
+    facilities: ['Library', 'Observatory', 'Hostels', 'Deer Park', 'Medical Center'],
   },
   {
     name: 'SRM Institute of Science and Technology',
@@ -207,8 +194,8 @@ const collegesData = [
     description: 'SRM Institute of Science and Technology is a deemed university with strong industry connections and global academic partnerships.',
     placement_percentage: 78.9, avg_package: 750000, highest_package: 7500000, total_students: 52000,
     accreditation: 'NAAC A++', ranking: 18,
-    courses: JSON.stringify([{ name: 'B.Tech Computer Science', duration: '4 years', fees: 380000 }, { name: 'BBA', duration: '3 years', fees: 200000 }, { name: 'MBA', duration: '2 years', fees: 380000 }]),
-    facilities: JSON.stringify(['Library', 'Sports Ground', 'Hostels', 'Medical Center', 'Shopping Complex', 'Bank']),
+    courses: [{ name: 'B.Tech Computer Science', duration: '4 years', fees: 380000 }, { name: 'MBA', duration: '2 years', fees: 380000 }],
+    facilities: ['Library', 'Sports Ground', 'Hostels', 'Medical Center', 'Shopping Complex'],
   },
   {
     name: 'Birla Institute of Technology Mesra',
@@ -219,8 +206,8 @@ const collegesData = [
     description: 'BIT Mesra is one of the oldest private technical institutions in India, known for its unique forest campus and strong engineering programs.',
     placement_percentage: 80.5, avg_package: 850000, highest_package: 9000000, total_students: 8500,
     accreditation: 'NAAC A', ranking: 20,
-    courses: JSON.stringify([{ name: 'B.Tech Computer Science', duration: '4 years', fees: 320000 }, { name: 'B.Tech Electronics', duration: '4 years', fees: 300000 }]),
-    facilities: JSON.stringify(['Library', 'Forest Campus', 'Hostels', 'Sports Complex', 'Medical Center']),
+    courses: [{ name: 'B.Tech Computer Science', duration: '4 years', fees: 320000 }, { name: 'B.Tech Electronics', duration: '4 years', fees: 300000 }],
+    facilities: ['Library', 'Forest Campus', 'Hostels', 'Sports Complex', 'Medical Center'],
   },
   {
     name: 'JNTU Hyderabad',
@@ -231,8 +218,8 @@ const collegesData = [
     description: 'JNTU Hyderabad is a prominent technical university in South India with a vast network of affiliated colleges across Telangana and Andhra Pradesh.',
     placement_percentage: 76.3, avg_package: 650000, highest_package: 5500000, total_students: 45000,
     accreditation: 'NAAC A', ranking: 22,
-    courses: JSON.stringify([{ name: 'B.Tech Computer Science', duration: '4 years', fees: 90000 }, { name: 'B.Tech Electronics', duration: '4 years', fees: 85000 }, { name: 'MBA', duration: '2 years', fees: 75000 }]),
-    facilities: JSON.stringify(['Library', 'Sports Complex', 'Hostels', 'Auditorium', 'Research Centers']),
+    courses: [{ name: 'B.Tech Computer Science', duration: '4 years', fees: 90000 }, { name: 'MBA', duration: '2 years', fees: 75000 }],
+    facilities: ['Library', 'Sports Complex', 'Hostels', 'Auditorium', 'Research Centers'],
   },
   {
     name: 'Amity University',
@@ -243,40 +230,34 @@ const collegesData = [
     description: 'Amity University is a leading private university with a modern campus, strong industry connections, and global academic programs.',
     placement_percentage: 75.6, avg_package: 680000, highest_package: 6000000, total_students: 125000,
     accreditation: 'NAAC A+', ranking: 25,
-    courses: JSON.stringify([{ name: 'B.Tech Computer Science', duration: '4 years', fees: 450000 }, { name: 'BCA', duration: '3 years', fees: 250000 }, { name: 'MBA', duration: '2 years', fees: 400000 }]),
-    facilities: JSON.stringify(['Library', 'Olympic Pool', 'Hostels', 'Food Court', 'Shopping Center', 'Amphitheater']),
+    courses: [{ name: 'B.Tech Computer Science', duration: '4 years', fees: 450000 }, { name: 'MBA', duration: '2 years', fees: 400000 }],
+    facilities: ['Library', 'Olympic Pool', 'Hostels', 'Food Court', 'Amphitheater'],
   },
 ];
 
 export async function seedDatabase() {
-  const existing = db.prepare('SELECT COUNT(*) as count FROM colleges').get() as { count: number };
-  if (existing.count > 0) {
-    console.log('📦 Database already seeded with', existing.count, 'colleges — skipping.');
+  const existing = await pool.query('SELECT COUNT(*) AS count FROM colleges');
+  if (parseInt(existing.rows[0].count) > 0) {
+    console.log('📦 Database already seeded with', existing.rows[0].count, 'colleges — skipping.');
     return;
   }
 
-  const insert = db.prepare(`
-    INSERT INTO colleges (id, name, location, state, city, fees_min, fees_max, rating, rating_count,
-      type, established, website, image_url, description, placement_percentage, avg_package,
-      highest_package, total_students, accreditation, ranking, courses, facilities)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `);
-
-  db.exec('BEGIN TRANSACTION');
-  try {
-    for (const c of collegesData) {
-      insert.run(
-        uuidv4(), c.name, c.location, c.state, c.city, c.fees_min, c.fees_max,
-        c.rating, c.rating_count, c.type, c.established, c.website, c.image_url,
-        c.description, c.placement_percentage, c.avg_package, c.highest_package,
-        c.total_students, c.accreditation, c.ranking, c.courses, c.facilities
-      );
-    }
-    db.exec('COMMIT');
-  } catch (err) {
-    db.exec('ROLLBACK');
-    throw err;
+  for (const c of collegesData) {
+    await pool.query(
+      `INSERT INTO colleges
+        (name, location, state, city, fees_min, fees_max, rating, rating_count,
+         type, established, website, image_url, description, placement_percentage,
+         avg_package, highest_package, total_students, accreditation, ranking, courses, facilities)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)`,
+      [
+        c.name, c.location, c.state, c.city, c.fees_min, c.fees_max,
+        c.rating, c.rating_count, c.type, c.established, c.website,
+        c.image_url, c.description, c.placement_percentage, c.avg_package,
+        c.highest_package, c.total_students, c.accreditation, c.ranking,
+        JSON.stringify(c.courses), JSON.stringify(c.facilities),
+      ]
+    );
   }
 
-  console.log(`✅ Seeded ${collegesData.length} colleges successfully`);
+  console.log(`✅ Seeded ${collegesData.length} colleges into PostgreSQL`);
 }

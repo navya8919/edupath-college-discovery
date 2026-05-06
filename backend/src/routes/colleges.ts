@@ -26,24 +26,26 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
   if (search) {
     const like = `%${search.toLowerCase()}%`;
     filterParams.push(like, like, like, like);
-    conditions.push(`(LOWER(name) LIKE ? OR LOWER(city) LIKE ? OR LOWER(state) LIKE ? OR LOWER(description) LIKE ?)`);
+    conditions.push(
+      `(LOWER(name) LIKE $${filterParams.length - 3} OR LOWER(city) LIKE $${filterParams.length - 2} OR LOWER(state) LIKE $${filterParams.length - 1} OR LOWER(description) LIKE $${filterParams.length})`
+    );
   }
   if (state) {
     filterParams.push(state);
-    conditions.push(`state = ?`);
+    conditions.push(`state = $${filterParams.length}`);
   }
   if (type) {
     filterParams.push(type);
-    conditions.push(`type = ?`);
+    conditions.push(`type = $${filterParams.length}`);
   }
   filterParams.push(parseInt(fees_min));
-  conditions.push(`fees_min >= ?`);
+  conditions.push(`fees_min >= $${filterParams.length}`);
   filterParams.push(parseInt(fees_max));
-  conditions.push(`fees_max <= ?`);
+  conditions.push(`fees_max <= $${filterParams.length}`);
 
   if (course) {
     filterParams.push(`%${course}%`);
-    conditions.push(`courses LIKE ?`);
+    conditions.push(`courses::text ILIKE $${filterParams.length}`);
   }
 
   const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
@@ -58,8 +60,7 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
   };
   const sortCol = allowedSort[sort] ?? 'ranking';
   const sortDir = order === 'desc' ? 'DESC' : 'ASC';
-  // SQLite doesn't support NULLS LAST — use CASE WHEN instead
-  const orderClause = `CASE WHEN ${sortCol} IS NULL THEN 1 ELSE 0 END, ${sortCol} ${sortDir}`;
+  const orderClause = `${sortCol} ${sortDir} NULLS LAST`;
 
   try {
     const countResult = await pool.query(
@@ -77,7 +78,7 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
        FROM colleges
        ${whereClause}
        ORDER BY ${orderClause}
-       LIMIT ? OFFSET ?`,
+       LIMIT $${pageParams.length - 1} OFFSET $${pageParams.length}`,
       pageParams
     );
 
@@ -94,7 +95,7 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
   }
 });
 
-// GET /api/colleges/states - distinct states for filter
+// GET /api/colleges/states - distinct states for filter dropdown
 router.get('/states', async (_req: Request, res: Response): Promise<void> => {
   try {
     const result = await pool.query('SELECT DISTINCT state FROM colleges ORDER BY state');
@@ -104,20 +105,14 @@ router.get('/states', async (_req: Request, res: Response): Promise<void> => {
   }
 });
 
-// GET /api/colleges/compare - compare multiple colleges
+// GET /api/colleges/compare?ids=id1,id2,id3
 router.get('/compare', async (req: Request, res: Response): Promise<void> => {
   const { ids } = req.query as { ids?: string };
-  if (!ids) {
-    res.status(400).json({ error: 'ids query param required' });
-    return;
-  }
+  if (!ids) { res.status(400).json({ error: 'ids query param required' }); return; }
   const idList = ids.split(',').slice(0, 3);
-  if (idList.length < 2) {
-    res.status(400).json({ error: 'Provide at least 2 college ids' });
-    return;
-  }
+  if (idList.length < 2) { res.status(400).json({ error: 'Provide at least 2 college ids' }); return; }
   try {
-    const placeholders = idList.map(() => '?').join(',');
+    const placeholders = idList.map((_, i) => `$${i + 1}`).join(',');
     const result = await pool.query(
       `SELECT * FROM colleges WHERE id IN (${placeholders})`,
       idList
@@ -129,14 +124,11 @@ router.get('/compare', async (req: Request, res: Response): Promise<void> => {
   }
 });
 
-// GET /api/colleges/:id - detail
+// GET /api/colleges/:id
 router.get('/:id', async (req: Request, res: Response): Promise<void> => {
   try {
     const result = await pool.query('SELECT * FROM colleges WHERE id=$1', [req.params.id]);
-    if (result.rows.length === 0) {
-      res.status(404).json({ error: 'College not found' });
-      return;
-    }
+    if (result.rows.length === 0) { res.status(404).json({ error: 'College not found' }); return; }
     res.json({ college: result.rows[0] });
   } catch (err) {
     console.error(err);
@@ -144,11 +136,11 @@ router.get('/:id', async (req: Request, res: Response): Promise<void> => {
   }
 });
 
-// POST /api/colleges/:id/save - save college (auth required)
+// POST /api/colleges/:id/save
 router.post('/:id/save', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     await pool.query(
-      'INSERT INTO saved_colleges (id, user_id, college_id) VALUES (gen_random_uuid(),$1,$2) ON CONFLICT (user_id, college_id) DO NOTHING',
+      'INSERT INTO saved_colleges (user_id, college_id) VALUES ($1,$2) ON CONFLICT (user_id, college_id) DO NOTHING',
       [req.user!.id, req.params.id]
     );
     res.json({ saved: true });
@@ -157,7 +149,7 @@ router.post('/:id/save', authMiddleware, async (req: AuthRequest, res: Response)
   }
 });
 
-// DELETE /api/colleges/:id/save - unsave college (auth required)
+// DELETE /api/colleges/:id/save
 router.delete('/:id/save', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     await pool.query(

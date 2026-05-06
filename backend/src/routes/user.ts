@@ -45,7 +45,7 @@ router.post('/comparisons', authMiddleware, async (req: AuthRequest, res: Respon
   }
   try {
     const result = await pool.query(
-      'INSERT INTO saved_comparisons (id, user_id, college_ids, name) VALUES (gen_random_uuid(),$1,$2,$3) RETURNING *',
+      'INSERT INTO saved_comparisons (user_id, college_ids, name) VALUES ($1,$2,$3) RETURNING *',
       [req.user!.id, JSON.stringify(college_ids), name || 'My Comparison']
     );
     res.status(201).json({ comparison: result.rows[0] });
