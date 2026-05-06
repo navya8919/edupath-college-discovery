@@ -21,8 +21,6 @@ services:
         value: 4000
       - key: NODE_ENV
         value: production
-      - key: FRONTEND_URL
-        value: https://edupath-frontend-mykl.onrender.com
       - key: DATABASE_URL
         fromDatabase:
           name: edupath-db
@@ -39,4 +37,7 @@ services:
       - key: NODE_VERSION
         value: 20.11.0
       - key: NEXT_PUBLIC_API_URL
-        value: https://edupath-backend-irch.onrender.com
+        fromService:
+          type: web
+          name: edupath-backend
+          envVarKey: RENDER_EXTERNAL_URL
