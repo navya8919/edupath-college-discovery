@@ -34,6 +34,7 @@ export async function setupDatabase() {
         ranking              INTEGER,
         courses              JSONB DEFAULT '[]',
         facilities           JSONB DEFAULT '[]',
+        cutoffs              JSONB DEFAULT '{}',
         created_at           TIMESTAMPTZ DEFAULT NOW()
       );
       CREATE TABLE IF NOT EXISTS saved_colleges (
@@ -104,6 +105,7 @@ export async function setupDatabase() {
         ranking              INTEGER,
         courses              TEXT DEFAULT '[]',
         facilities           TEXT DEFAULT '[]',
+        cutoffs              TEXT DEFAULT '{}',
         created_at           TEXT DEFAULT (datetime('now'))
       )
     `);

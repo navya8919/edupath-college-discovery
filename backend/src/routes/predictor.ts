@@ -3,142 +3,112 @@ import { pool } from '../db';
 
 const router = Router();
 
-interface CutoffResult {
-  maxNirfRank: number;
-  preferType?: string;
-}
-
-// Category-based rank inflation (simulating easier cutoffs for reserved categories)
-function adjustRankForCategory(rank: number, category: string): number {
-  switch (category) {
-    case 'OBC-NCL': return rank * 0.7; // 30% boost
-    case 'SC':      return rank * 0.4; // 60% boost
-    case 'ST':      return rank * 0.3; // 70% boost
-    case 'EWS':     return rank * 0.8; // 20% boost
-    default:        return rank;
-  }
-}
-
-// Rank-to-NIRF-cutoff mapping per exam
-function getCutoff(exam: string, rank: number): CutoffResult | null {
-  switch (exam) {
-    case 'JEE Advanced':
-      if (rank <= 500)   return { maxNirfRank: 2,  preferType: 'Government' };
-      if (rank <= 1500)  return { maxNirfRank: 4,  preferType: 'Government' };
-      if (rank <= 5000)  return { maxNirfRank: 7  };
-      if (rank <= 15000) return { maxNirfRank: 12 };
-      if (rank <= 30000) return { maxNirfRank: 20 };
-      return            { maxNirfRank: 30 };
-
-    case 'JEE Main':
-      if (rank <= 1000)  return { maxNirfRank: 5,  preferType: 'Government' };
-      if (rank <= 10000) return { maxNirfRank: 10, preferType: 'Government' };
-      if (rank <= 50000) return { maxNirfRank: 18 };
-      if (rank <= 200000)return { maxNirfRank: 28 };
-      return            { maxNirfRank: 50 };
-
-    case 'NEET':
-      if (rank <= 500)   return { maxNirfRank: 3  };
-      if (rank <= 5000)  return { maxNirfRank: 8  };
-      if (rank <= 25000) return { maxNirfRank: 15 };
-      if (rank <= 100000)return { maxNirfRank: 25 };
-      return            { maxNirfRank: 50 };
-
-    case 'CAT':
-      if (rank <= 50)   return { maxNirfRank: 2  };
-      if (rank <= 200)  return { maxNirfRank: 5  };
-      if (rank <= 1000) return { maxNirfRank: 12 };
-      return           { maxNirfRank: 25 };
-
-    case 'GATE':
-      if (rank <= 200)  return { maxNirfRank: 3,  preferType: 'Government' };
-      if (rank <= 1000) return { maxNirfRank: 8,  preferType: 'Government' };
-      if (rank <= 5000) return { maxNirfRank: 15 };
-      return           { maxNirfRank: 30 };
-
-    // EAMCET (AP/TS Engineering + Medical — state-level exam)
-    // Rank maps to NIRF rank ceiling; Telangana/AP colleges preferred
-    case 'EAMCET':
-      if (rank <= 1000)   return { maxNirfRank: 6,  preferType: 'Government' };
-      if (rank <= 5000)   return { maxNirfRank: 12, preferType: 'Government' };
-      if (rank <= 20000)  return { maxNirfRank: 18 };
-      if (rank <= 50000)  return { maxNirfRank: 25 };
-      if (rank <= 100000) return { maxNirfRank: 30 };
-      return              { maxNirfRank: 50 };
-
-    default:
-      return null;
-  }
-}
-
 // GET /api/predictor?exam=JEE+Advanced&rank=5000&state=Maharashtra&category=General
 router.get('/', async (req: Request, res: Response): Promise<void> => {
   const { exam = 'JEE Advanced', rank, state, category = 'General' } = req.query as Record<string, string>;
 
-  let rankNum = parseInt(rank);
+  const rankNum = parseInt(rank);
   if (!rank || isNaN(rankNum) || rankNum <= 0) {
     res.status(400).json({ error: 'A valid positive rank is required.' });
     return;
   }
 
-  // Apply category adjustment
-  rankNum = adjustRankForCategory(rankNum, category);
-
-  const cutoff = getCutoff(exam, rankNum);
-  if (!cutoff) {
-    res.status(400).json({
-      error: `Invalid exam "${exam}". Valid options: JEE Advanced, JEE Main, NEET, CAT, GATE, EAMCET`,
-    });
-    return;
-  }
-
-  const params: unknown[] = [cutoff.maxNirfRank];
-  const extras: string[] = [];
-
-  if (cutoff.preferType) {
-    params.push(cutoff.preferType);
-    extras.push(`type = $${params.length}`);
-  }
-  if (state && state.trim()) {
-    params.push(state.trim());
-    extras.push(`state = $${params.length}`);
-  }
-
-  const whereExtra = extras.length > 0 ? ` AND (${extras.join(' OR ')})` : '';
-
   try {
-    // First try with type/state preference
-    let result = await pool.query(
+    // 1. Fetch all colleges (or filter by state in DB if state provided)
+    const params: unknown[] = [];
+    let stateFilter = '';
+    
+    if (state && state.trim()) {
+      stateFilter = 'WHERE state = $1';
+      params.push(state.trim());
+    }
+
+    const result = await pool.query(
       `SELECT id, name, location, state, city, fees_min, fees_max, rating, type,
               ranking, placement_percentage, avg_package, highest_package,
-              accreditation, image_url, courses, description
+              accreditation, image_url, courses, description, cutoffs
        FROM colleges
-       WHERE ranking IS NOT NULL AND ranking <= $1${whereExtra}
-       ORDER BY ranking ASC
-       LIMIT 10`,
+       ${stateFilter}
+       ORDER BY ranking ASC NULLS LAST`,
       params
     );
 
-    // If fewer than 3 results, broaden search to all types
-    if (result.rows.length < 3) {
-      result = await pool.query(
+    const colleges = result.rows;
+    const eligibleColleges = [];
+
+    // 2. Filter in memory to handle JSON seamlessly across SQLite and PG
+    for (const college of colleges) {
+      // Parse cutoffs if it's a string (SQLite), otherwise use as is (PG JSONB)
+      let cutoffsObj: Record<string, Record<string, number>> = {};
+      try {
+        cutoffsObj = typeof college.cutoffs === 'string' 
+          ? JSON.parse(college.cutoffs) 
+          : (college.cutoffs || {});
+      } catch (e) {
+        continue;
+      }
+
+      const examCutoffs = cutoffsObj[exam];
+      if (!examCutoffs) continue; // College doesn't accept this exam
+
+      const categoryCutoff = examCutoffs[category];
+      if (!categoryCutoff) continue; // No cutoff data for this category
+
+      // Check if user's rank is within the cutoff (lower rank number is better)
+      if (rankNum <= categoryCutoff) {
+        eligibleColleges.push(college);
+      }
+    }
+
+    // 3. If no colleges found, we could do a fallback (optional), but real prediction is strict
+    // We'll just return what matched. If state was provided and no matches, maybe drop state and try again.
+    let finalColleges = eligibleColleges;
+    
+    if (finalColleges.length === 0 && state && state.trim()) {
+      // Fallback: search across all states
+      const allResult = await pool.query(
         `SELECT id, name, location, state, city, fees_min, fees_max, rating, type,
                 ranking, placement_percentage, avg_package, highest_package,
-                accreditation, image_url, courses, description
+                accreditation, image_url, courses, description, cutoffs
          FROM colleges
-         WHERE ranking IS NOT NULL AND ranking <= $1
-         ORDER BY ranking ASC
-         LIMIT 10`,
-        [cutoff.maxNirfRank]
+         ORDER BY ranking ASC NULLS LAST`
       );
+      
+      const allColleges = allResult.rows;
+      finalColleges = [];
+      
+      for (const college of allColleges) {
+        let cutoffsObj: Record<string, Record<string, number>> = {};
+        try {
+          cutoffsObj = typeof college.cutoffs === 'string' 
+            ? JSON.parse(college.cutoffs) 
+            : (college.cutoffs || {});
+        } catch (e) {
+          continue;
+        }
+
+        const examCutoffs = cutoffsObj[exam];
+        if (examCutoffs && examCutoffs[category] && rankNum <= examCutoffs[category]) {
+          finalColleges.push(college);
+        }
+      }
     }
+
+    // Take top 10
+    finalColleges = finalColleges.slice(0, 10);
+
+    // Provide a proxy maxNirfRank for the UI chance bar 
+    // (We use the worst ranked college in the eligible list or fallback to 50)
+    const maxNirfRank = finalColleges.length > 0 
+      ? Math.max(...finalColleges.map(c => Number(c.ranking) || 50))
+      : 50;
 
     res.json({
       exam,
       rank: rankNum,
-      maxNirfRank: cutoff.maxNirfRank,
-      total: result.rows.length,
-      colleges: result.rows,
+      maxNirfRank,
+      total: finalColleges.length,
+      colleges: finalColleges,
     });
   } catch (err) {
     console.error(err);
