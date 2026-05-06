@@ -16,7 +16,7 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
   }
   try {
     const countResult = await pool.query(`SELECT COUNT(*) AS count FROM questions q ${where}`, params);
-    const total = parseInt(countResult.rows[0].count);
+    const total = parseInt(countResult.rows[0].count as string);
     params.push(parseInt(limit));
     params.push(offset);
     const result = await pool.query(

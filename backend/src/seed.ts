@@ -237,7 +237,7 @@ const collegesData = [
 
 export async function seedDatabase() {
   const existing = await pool.query('SELECT COUNT(*) AS count FROM colleges');
-  if (parseInt(existing.rows[0].count) > 0) {
+  if (parseInt(existing.rows[0].count as string) > 0) {
     console.log('📦 Database already seeded with', existing.rows[0].count, 'colleges — skipping.');
     return;
   }

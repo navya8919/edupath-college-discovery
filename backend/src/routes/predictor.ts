@@ -56,6 +56,16 @@ function getCutoff(exam: string, rank: number): CutoffResult | null {
       if (rank <= 5000) return { maxNirfRank: 15 };
       return           { maxNirfRank: 30 };
 
+    // EAMCET (AP/TS Engineering + Medical — state-level exam)
+    // Rank maps to NIRF rank ceiling; Telangana/AP colleges preferred
+    case 'EAMCET':
+      if (rank <= 1000)   return { maxNirfRank: 6,  preferType: 'Government' };
+      if (rank <= 5000)   return { maxNirfRank: 12, preferType: 'Government' };
+      if (rank <= 20000)  return { maxNirfRank: 18 };
+      if (rank <= 50000)  return { maxNirfRank: 25 };
+      if (rank <= 100000) return { maxNirfRank: 30 };
+      return              { maxNirfRank: 50 };
+
     default:
       return null;
   }
@@ -77,7 +87,7 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
   const cutoff = getCutoff(exam, rankNum);
   if (!cutoff) {
     res.status(400).json({
-      error: `Invalid exam "${exam}". Valid options: JEE Advanced, JEE Main, NEET, CAT, GATE`,
+      error: `Invalid exam "${exam}". Valid options: JEE Advanced, JEE Main, NEET, CAT, GATE, EAMCET`,
     });
     return;
   }

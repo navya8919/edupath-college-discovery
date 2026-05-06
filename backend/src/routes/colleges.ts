@@ -67,7 +67,7 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
       `SELECT COUNT(*) AS count FROM colleges ${whereClause}`,
       filterParams
     );
-    const total = parseInt(countResult.rows[0].count);
+    const total = parseInt(countResult.rows[0].count as string);
 
     const pageParams = [...filterParams, parseInt(limit), offset];
 
